@@ -32,15 +32,21 @@ def calculate_working_days(start_date: date, end_date: date) -> int:
 
 @app.route('/api/leave-requests', methods=['POST'])
 def submit_leave_request():
+    # Handle cases where JSON is missing or malformed (e.g., wrong Content-Type)
+    if not request.is_json:
+        return jsonify({"error": "Request must be JSON"}), 400
+    
     data = request.get_json()
-    if not data:
-        return jsonify({"error": "Invalid JSON"}), 400
+    
+    # Handle empty JSON or missing data
+    if not data or not isinstance(data, dict):
+        return jsonify({"error": "Invalid JSON payload"}), 400
 
     start_date_str = data.get('start_date')
     end_date_str = data.get('end_date')
 
     if not start_date_str or not end_date_str:
-        return jsonify({"error": "Missing start_date or end_date"}), 400
+        return jsonify({"error": "Missing start_date or end_date in JSON payload"}), 400
 
     try:
         start_date = date.fromisoformat(start_date_str)
